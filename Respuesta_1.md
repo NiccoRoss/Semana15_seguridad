@@ -73,11 +73,12 @@ La línea resaltada evita que Android respalde automáticamente datos de la apli
 
 ---
 
-### 🖼️ 1.3 Gestión de Archivos (3 puntos)
+### 🔐 1.3 Gestión de Archivos (3 puntos)
 
 **Archivos analizados:** `CameraActivity.kt`, `file_paths.xml`
 
 - **¿Cómo se implementa la compartición segura de archivos de imágenes?**
+
 Se hace utilizando FileProvider, el cual funciona como un intermediario para que se pueda acceder a la información
 de diferentes apps sin exponer la privacidad.
 
