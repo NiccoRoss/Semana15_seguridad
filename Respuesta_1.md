@@ -77,15 +77,17 @@ La línea resaltada evita que Android respalde automáticamente datos de la apli
 
 **Archivos analizados:** `CameraActivity.kt`, `file_paths.xml`
 
-- **¿Cómo se implementa la compartición segura de archivos de imágenes?**
+---
 
-Se hace utilizando FileProvider, el cual funciona como un intermediario para que se pueda acceder a la información
-de diferentes apps sin exponer la privacidad.
+#### 📸 ¿Cómo se implementa la compartición segura de archivos de imágenes?
 
+Se hace utilizando **FileProvider**, el cual funciona como un intermediario para que se pueda acceder a la información de diferentes apps sin exponer la privacidad.
+
+```kotlin
 private fun takePhoto() {
     try {
         val photoFile = createImageFile()
-        currentPhotoUri = `FileProvider.getUriForFile` (
+        currentPhotoUri = FileProvider.getUriForFile(
             this,
             "com.example.seguridad_priv_a.fileprovider",
             photoFile
