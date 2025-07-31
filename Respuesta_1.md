@@ -75,6 +75,67 @@ La línea resaltada evita que Android respalde automáticamente datos de la apli
 
 ### 🖼️ 1.3 Gestión de Archivos (3 puntos)
 
-**Archivos analizados:** `AndroidManifest.xml`, `MainActivity.kt`
+**Archivos analizados:** `CameraActivity.kt`, `file_paths.xml`
 
-- **Permisos peligrosos declarados en el manifiesto:**
+- **¿Cómo se implementa la compartición segura de archivos de imágenes?**
+Se hace utilizando FileProvider, el cual funciona como un intermediario para que se pueda acceder a la información
+de diferentes apps sin exponer la privacidad.
+
+private fun takePhoto() {
+    try {
+        val photoFile = createImageFile()
+        currentPhotoUri = `FileProvider.getUriForFile` (
+            this,
+            "com.example.seguridad_priv_a.fileprovider",
+            photoFile
+        )
+        
+        currentPhotoUri?.let { uri ->
+            takePictureLauncher.launch(uri)
+        }
+        dataProtectionManager.logAccess("CAMERA_ACCESS", "Iniciando captura de foto")
+        
+    } catch (ex: IOException) {
+        dataProtectionManager.logAccess("CAMERA_ERROR", "Error al crear archivo de imagen: ${ex.message}")
+        Toast.makeText(this, "Error al crear archivo de imagen", Toast.LENGTH_SHORT).show()
+    }
+}
+
+En el archivo file_paths.xml se definen las rutas especificas para poder acceder a los archivos de imágenes:
+
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-files-path name="my_images" path="Pictures" />
+    <external-files-path name="my_audio" path="Audio" />
+</paths>
+
+- **¿Qué autoridad se utiliza para el FileProvider?**
+
+Se visualiza en AndroidManifest el Provider que se utiliza en nuestro código de CameraActivity.kt:
+
+<provider
+    android:name="androidx.core.content.FileProvider"
+    ` android:authorities="com.example.seguridad_priv_a.fileprovider" `
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+</provider>
+
+
+- **Explica por qué no se debe usar `file://` URIs directamente**
+
+A partir de Android 7.0 (API 24), el uso de file:// URIs está prohibido por las siguientes razones:
+
+  🔐 Seguridad: Revelan rutas absolutas del sistema de archivos.
+
+  👁️ Privacidad: Pueden permitir acceso a archivos no destinados a otras apps.
+
+  💥 Compatibilidad: Generan FileUriExposedException, lo que provoca que la app se cierre abruptamente si intenta compartir un file:// con otra app.
+
+✅ La alternativa segura es usar content:// URIs proporcionadas por FileProvider, las cuales:
+
+  1.Ocultan la ubicación real del archivo.
+  2.Permiten permisos temporales controlados.
+  3.Previenen exposición accidental de datos internos.
